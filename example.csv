@@ -1,0 +1,5 @@
+MAC,IPADDR,HOSTNAME,CID,DESCR,
+18:e8:29:b1:e0:a8,10.0.0.2,unifi-switch1,,Unifi Main Switch,
+e2:6f:30:af:d6:16,10.0.0.6,unifi,,Unifi Controller,
+52:54:00:cc:8d:65,10.0.0.7,seafile,,Seafile,
+00:1c:2a:02:63:a4,10.0.0.11,server1,,Server,

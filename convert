@@ -1,0 +1,55 @@
+#! /usr/bin/env ruby
+
+require 'csv'
+require 'active_support/all'
+
+FIELDS = %w(mac cid ipaddr hostname descr filename rootpath defaultleasetime maxleasetime gateway domain domainsearchlist ddnsdomain ddnsdomainprimary ddnsdomainkeyname ddnsdomainkey tftp ldap)
+
+def run
+  input_file  = ARGV[0].to_s
+  output_file = ARGV[1] || input_file.sub(/\.csv$/, '') + ".xml"
+  output_str  = ""
+
+  show_help(1) if input_file.empty? || !File.exists?(input_file)
+
+  content = File.open(input_file).read
+  content = strip_bom(content)
+
+  CSV.parse(content, headers: true) do |row|
+    hash = new_hash(FIELDS)
+
+    row.each_entry do |k, v|
+      next if k.blank?
+      hash[strip_bom(k.downcase)] = strip_bom(v || '')
+    end
+
+    if hash['ipaddr'].present? && hash['mac'].present?
+      output_str << hash.to_xml(root: 'staticmap', skip_instruct: true, skip_types: true)
+    end
+  end
+
+  File.write(output_file, output_str)
+  puts "Saved to #{output_file}. Done!"
+end
+
+
+def new_hash(fields)
+  out = {}
+  fields.each do |k|
+    out[strip_bom(k)] = ''
+  end
+  out
+end
+
+def strip_bom(str)
+  str.sub("\xEF\xBB\xBF", '') # strip BOM: https://estl.tech/of-ruby-and-hidden-csv-characters-ef482c679b35
+end
+
+def show_help(exit_code = nil)
+  puts "Usage:"
+  puts "  ./convert /path/to/input.csv [/path/to/output.xml]"
+  puts ""
+  exit(exit_code) if exit_code
+end
+
+run
